@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { Milk, ClipboardList, NotebookPen, FileBarChart, BarChart3, LayoutDashboard, BookOpen, Calculator, SlidersHorizontal, Heart, Dna } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import BulkUpload from "@/components/BulkUpload";
+import PdfDownload from "@/components/PdfDownload";
 
 const inputItems = [
   {
@@ -87,6 +89,12 @@ const Index = () => {
         <p className="text-lg text-muted-foreground">
           Seleccione el módulo de registro
         </p>
+      </div>
+
+      {/* Carga masiva y PDF */}
+      <div className="flex flex-col md:flex-row gap-4 max-w-5xl w-full mb-10">
+        <BulkUpload />
+        <PdfDownload />
       </div>
 
       {/* Ingreso de información - Verde, tamaño completo */}
