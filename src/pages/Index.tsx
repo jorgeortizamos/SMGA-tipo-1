@@ -91,6 +91,12 @@ const Index = () => {
         </p>
       </div>
 
+      {/* Carga masiva y PDF */}
+      <div className="flex flex-col md:flex-row gap-4 max-w-5xl w-full mb-10">
+        <BulkUpload />
+        <PdfDownload />
+      </div>
+
       {/* Ingreso de información - Verde, tamaño completo */}
       <p className="text-sm font-medium uppercase tracking-wider text-primary mb-4">
         📥 Ingreso de Información
