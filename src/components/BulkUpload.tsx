@@ -36,7 +36,7 @@ const BulkUpload = () => {
   const { setRegistrosBasicos, setRegistrosProductivos, setRegistrosReproductivos, setRegistrosOtros } = useGanaderia();
 
   const saveToDb = async (table: string, rows: Record<string, any>[]) => {
-    const { error } = await supabase.from(table).insert(rows);
+    const { error } = await (supabase.from(table) as any).insert(rows);
     if (error) console.error(`Error saving to ${table}:`, error);
   };
 
