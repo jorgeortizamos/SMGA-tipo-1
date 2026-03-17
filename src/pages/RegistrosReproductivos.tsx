@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useGanaderia, RegistroReproductivo } from "@/context/GanaderiaContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const razaOptions = [
   { value: "holando", label: "Holando" },
@@ -40,6 +41,12 @@ const RegistrosReproductivos = () => {
     setOpen(true);
   };
 
+  const startNew = () => {
+    setForm(emptyRepro("", ""));
+    setEditVacaId(null);
+    setOpen(true);
+  };
+
   // Calculate IIP from parto and parto1 dates
   const calcIIP = (parto: string, parto1: string): string => {
     if (!parto || !parto1) return "";
@@ -67,11 +74,11 @@ const RegistrosReproductivos = () => {
     return count > 0 ? count.toString() : "";
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form) return;
+    if (!form.id_vaca) { toast.error("El campo Id Vaca es obligatorio"); return; }
 
-    // Auto-calculate indicators
     const updatedForm = {
       ...form,
       iip: calcIIP(form.parto, form.parto1),
@@ -79,13 +86,25 @@ const RegistrosReproductivos = () => {
       serv_conc: calcServConc(form.servicio1, form.servicio2, form.servicio3),
     };
 
+    const dbRow = {
+      id_vaca: updatedForm.id_vaca, ejercicio: updatedForm.ejercicio, parto: updatedForm.parto,
+      raza: updatedForm.raza, servicio1: updatedForm.servicio1, servicio2: updatedForm.servicio2,
+      servicio3: updatedForm.servicio3, concepcion1: updatedForm.concepcion1,
+      toro_usado: updatedForm.toroUsado, aborto1: updatedForm.aborto1, aborto2: updatedForm.aborto2,
+      parto1: updatedForm.parto1, iip: updatedForm.iip, ipc: updatedForm.ipc, serv_conc: updatedForm.serv_conc,
+    };
+
     const existingIdx = registrosReproductivos.findIndex((r) => r.id_vaca === editVacaId);
     if (existingIdx >= 0) {
       setRegistrosReproductivos((prev) => prev.map((r, i) => (i === existingIdx ? updatedForm : r)));
+      await supabase.from('registros_reproductivos').delete().eq('id_vaca', updatedForm.id_vaca).eq('ejercicio', updatedForm.ejercicio);
+      await supabase.from('registros_reproductivos').insert(dbRow);
       toast.success("Registro reproductivo actualizado");
     } else {
       setRegistrosReproductivos((prev) => [...prev, updatedForm]);
-      toast.success("Registro reproductivo guardado");
+      const { error } = await supabase.from('registros_reproductivos').insert(dbRow);
+      if (error) { toast.error("Error al guardar"); console.error(error); }
+      else toast.success("Registro reproductivo guardado en Supabase");
     }
     setForm(null);
     setEditVacaId(null);
@@ -94,6 +113,9 @@ const RegistrosReproductivos = () => {
 
   return (
     <FormLayout title="Registros Reproductivos">
+      <div className="flex justify-end mb-4">
+        <Button onClick={startNew}><Plus className="h-4 w-4 mr-2" /> Agregar Datos</Button>
+      </div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>

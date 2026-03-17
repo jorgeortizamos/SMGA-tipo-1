@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Plus, Pencil } from "lucide-react";
 import { useGanaderia, RegistroBasico } from "@/context/GanaderiaContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const ejercicioOptions = Array.from({ length: 10 }, (_, i) => {
   const y = 2020 + i;
@@ -38,15 +39,25 @@ const RegistrosBasicos = () => {
   const update = (key: keyof RegistroBasico) => (value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.id_vaca) { toast.error("El campo Id Vaca es obligatorio"); return; }
+    const dbRow = {
+      ejercicio: form.ejercicio, id_vaca: form.id_vaca, partos: form.partos,
+      fecha_nacimiento: form.fecha_nacimiento, raza: form.raza, lactancia: form.lactancia,
+      edad: form.edad, potencial_vaca: form.potencial_vaca,
+    };
     if (editIndex !== null) {
       setRegistrosBasicos((prev) => prev.map((r, i) => (i === editIndex ? form : r)));
+      // Update in Supabase: delete old + insert new (simple approach)
+      await supabase.from('registros_basicos').delete().eq('id_vaca', form.id_vaca).eq('ejercicio', form.ejercicio);
+      await supabase.from('registros_basicos').insert(dbRow);
       toast.success("Registro actualizado");
     } else {
       setRegistrosBasicos((prev) => [...prev, form]);
-      toast.success("Registro agregado");
+      const { error } = await supabase.from('registros_basicos').insert(dbRow);
+      if (error) { toast.error("Error al guardar en Supabase"); console.error(error); }
+      else toast.success("Registro agregado y guardado");
     }
     setForm(emptyRegistro); setEditIndex(null); setOpen(false);
   };
