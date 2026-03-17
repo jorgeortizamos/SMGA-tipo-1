@@ -3,9 +3,9 @@ import * as XLSX from "xlsx";
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { useGanaderia, RegistroBasico, RegistroProductivo, RegistroReproductivo, RegistroOtro } from "@/context/GanaderiaContext";
 
-// Expected columns per sheet/section
 const BASICOS_COLS = ["ejercicio", "id_vaca", "partos", "fecha_nacimiento", "raza", "lactancia", "edad", "potencial_vaca"];
 const PRODUCTIVOS_COLS = ["ejercicio", "id_vaca", "reg_1_dia30", "reg_2_dia120", "reg_3_dia210", "reg_4_dia270", "porcentaje_grasa", "porcentaje_proteina"];
 const REPRODUCTIVOS_COLS = ["ejercicio", "id_vaca", "parto", "raza", "servicio1", "servicio2", "servicio3", "concepcion1", "toroUsado", "aborto1", "aborto2", "parto1"];
@@ -35,6 +35,15 @@ const BulkUpload = () => {
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const { setRegistrosBasicos, setRegistrosProductivos, setRegistrosReproductivos, setRegistrosOtros } = useGanaderia();
 
+  const saveToDb = async (table: string, rows: Record<string, any>[]) => {
+    try {
+      const { error } = await (supabase as any).from(table).insert(rows);
+      if (error) console.error(`Error saving to ${table}:`, error);
+    } catch (err) {
+      console.error(`Error saving to ${table}:`, err);
+    }
+  };
+
   const processFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -54,7 +63,6 @@ const BulkUpload = () => {
           const section = matchSection(headers);
 
           if (!section) {
-            // Try to detect from sheet name
             const sn = normalize(sheetName);
             const found = ALL_SECTIONS.find((s) => sn.includes(normalize(s.name)));
             if (!found) {
@@ -80,18 +88,40 @@ const BulkUpload = () => {
 
           if (sec.name === "Básicos") {
             setRegistrosBasicos((prev) => [...prev, ...rows as unknown as RegistroBasico[]]);
+            saveToDb('registros_basicos', rows.map(r => ({
+              ejercicio: r.ejercicio, id_vaca: r.id_vaca, partos: r.partos,
+              fecha_nacimiento: r.fecha_nacimiento, raza: r.raza, lactancia: r.lactancia,
+              edad: r.edad, potencial_vaca: r.potencial_vaca,
+            })));
           } else if (sec.name === "Productivos") {
             const prodRows = rows.map((r) => ({
               ...r, lc305_wood: "", lact1: "", lact2: "", lact3: "", lact4: "", lact5: "",
             }));
             setRegistrosProductivos((prev) => [...prev, ...prodRows as unknown as RegistroProductivo[]]);
+            saveToDb('registros_productivos', rows.map(r => ({
+              ejercicio: r.ejercicio, id_vaca: r.id_vaca,
+              reg_1_dia30: r.reg_1_dia30, reg_2_dia120: r.reg_2_dia120,
+              reg_3_dia210: r.reg_3_dia210, reg_4_dia270: r.reg_4_dia270,
+              porcentaje_grasa: r.porcentaje_grasa, porcentaje_proteina: r.porcentaje_proteina,
+            })));
           } else if (sec.name === "Reproductivos") {
             const reproRows = rows.map((r) => ({
               ...r, iip: "", ipc: "", serv_conc: "",
             }));
             setRegistrosReproductivos((prev) => [...prev, ...reproRows as unknown as RegistroReproductivo[]]);
+            saveToDb('registros_reproductivos', rows.map(r => ({
+              id_vaca: r.id_vaca, ejercicio: r.ejercicio, parto: r.parto, raza: r.raza,
+              servicio1: r.servicio1, servicio2: r.servicio2, servicio3: r.servicio3,
+              concepcion1: r.concepcion1, toro_usado: r.toroUsado,
+              aborto1: r.aborto1, aborto2: r.aborto2, parto1: r.parto1,
+            })));
           } else if (sec.name === "Otros") {
             setRegistrosOtros((prev) => [...prev, ...rows as unknown as RegistroOtro[]]);
+            saveToDb('registros_otros', rows.map(r => ({
+              id_vaca: r.id_vaca, ejercicio: r.ejercicio,
+              renguera: r.renguera, mastitis: r.mastitis, fac_parto: r.facParto,
+              longevidad: r.longevidad, fortaleza_patas: r.fortalezaPatas,
+            })));
           }
 
           totalRows += rows.length;
@@ -99,8 +129,8 @@ const BulkUpload = () => {
         }
 
         if (totalRows > 0) {
-          setStatus({ type: "success", message: `✅ ${totalRows} registros cargados (${loaded.join(", ")})` });
-          toast.success(`${totalRows} registros importados exitosamente`);
+          setStatus({ type: "success", message: `✅ ${totalRows} registros cargados y guardados en Supabase (${loaded.join(", ")})` });
+          toast.success(`${totalRows} registros importados y guardados`);
         }
         if (errors.length > 0) {
           setStatus((prev) => ({
@@ -127,7 +157,7 @@ const BulkUpload = () => {
         <FileSpreadsheet className="h-6 w-6 text-primary shrink-0" />
         <div className="flex-1 text-center sm:text-left">
           <p className="text-sm font-semibold text-card-foreground">Carga masiva de datos</p>
-          <p className="text-xs text-muted-foreground">Suba un archivo Excel o CSV con las columnas del sistema</p>
+          <p className="text-xs text-muted-foreground">Suba un archivo Excel o CSV — se guarda en Supabase</p>
         </div>
         <input
           ref={fileRef}

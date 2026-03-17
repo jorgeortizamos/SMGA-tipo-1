@@ -71,7 +71,7 @@ const RegistrosBasicos = () => {
                 <FieldInput label="Id Vaca" value={form.id_vaca} onChange={update("id_vaca")} type="number" />
                 <FieldSelect label="Partos" value={form.partos} onChange={update("partos")} options={partosOptions} placeholder="Seleccionar" />
                 <FieldInput label="Fecha Nacimiento" value={form.fecha_nacimiento} onChange={update("fecha_nacimiento")} type="date" />
-                <FieldInput label="Raza (código)" value={form.raza} onChange={update("raza")} type="number" />
+                <FieldSelect label="Raza" value={form.raza} onChange={update("raza")} options={[{ value: "Jersey", label: "Jersey" }, { value: "Holando", label: "Holando" }, { value: "Otras", label: "Otras" }]} placeholder="Seleccionar raza" />
                 <FieldSelect label="Lactancia" value={form.lactancia} onChange={update("lactancia")} options={lactanciaOptions} placeholder="Seleccionar" />
                 <FieldInput label="Edad (años)" value={form.edad} onChange={update("edad")} type="number" />
                 <FieldInput label="Potencial Vaca (lt)" value={form.potencial_vaca} onChange={update("potencial_vaca")} type="number" highlighted />

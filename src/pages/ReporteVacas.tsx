@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import FormLayout from "@/components/FormLayout";
 import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { useGanaderia, calcWood } from "@/context/GanaderiaContext";
 
@@ -15,7 +14,6 @@ const calcKg = (lc305: number, pct: number) => lc305 > 0 && pct > 0 ? lc305 * (p
 const ReporteVacas = () => {
   const { registrosBasicos, registrosProductivos, registrosReproductivos, factores } = useGanaderia();
 
-  // Sort states for each section
   const [sortStates, setSortStates] = useState<Record<string, { key: string; asc: boolean }>>({});
 
   const toggleSort = (section: string, key: string) => {
@@ -26,38 +24,59 @@ const ReporteVacas = () => {
     });
   };
 
-  // Compute enriched vaca data
+  // Compute wood305 for a single productivo record
+  const computeWood305 = (prod: typeof registrosProductivos[0], vaca: typeof registrosBasicos[0]) => {
+    const reales = [
+      parseFloat(prod.reg_1_dia30) || 0, parseFloat(prod.reg_2_dia120) || 0,
+      parseFloat(prod.reg_3_dia210) || 0, parseFloat(prod.reg_4_dia270) || 0,
+    ];
+    if (!reales.some((v) => v > 0)) return 0;
+    const pots = DIAS.map((dia, i) => {
+      let closest = POTENCIALES[0]; let minD = Math.abs(calcWood(POTENCIALES[0], dia) - reales[i]);
+      for (const p of POTENCIALES) { const d = Math.abs(calcWood(p, dia) - reales[i]); if (d < minD) { minD = d; closest = p; } }
+      return closest;
+    });
+    return pots.reduce((s, v) => s + v, 0) / pots.length;
+  };
+
+  // Compute enriched vaca data with corrected lactancias
   const vacaData = useMemo(() => {
+    // Group all productivos by id_vaca (one per ejercicio = one lactancia)
+    const prodByVaca = new Map<string, typeof registrosProductivos>();
+    for (const prod of registrosProductivos) {
+      const list = prodByVaca.get(prod.id_vaca) || [];
+      list.push(prod);
+      prodByVaca.set(prod.id_vaca, list);
+    }
+
     return registrosBasicos.map((vaca) => {
-      const prod = registrosProductivos.find((p) => p.id_vaca === vaca.id_vaca);
+      const allProds = prodByVaca.get(vaca.id_vaca) || [];
+      const prod = allProds.find((p) => p.ejercicio === vaca.ejercicio) || allProds[0];
       const repro = registrosReproductivos.find((r) => r.id_vaca === vaca.id_vaca);
 
+      // Calculate wood305 for current record
       let lc305 = 0;
-      if (prod) {
-        const reales = [parseFloat(prod.reg_1_dia30) || 0, parseFloat(prod.reg_2_dia120) || 0, parseFloat(prod.reg_3_dia210) || 0, parseFloat(prod.reg_4_dia270) || 0];
-        if (reales.some((v) => v > 0)) {
-          const pots = DIAS.map((dia, i) => {
-            let closest = POTENCIALES[0]; let minD = Math.abs(calcWood(POTENCIALES[0], dia) - reales[i]);
-            for (const p of POTENCIALES) { const d = Math.abs(calcWood(p, dia) - reales[i]); if (d < minD) { minD = d; closest = p; } }
-            return closest;
-          });
-          lc305 = pots.reduce((s, v) => s + v, 0) / pots.length;
-        }
-      }
+      if (prod) lc305 = computeWood305(prod, vaca);
+
+      // Find correction factor, default to 1
+      const edad = parseInt(vaca.edad) || 0;
+      const lactancia = parseInt(vaca.lactancia) || 0;
+      const razaNombre = vaca.raza || "Otras";
+      const factor = factores.find((f) => f.raza === razaNombre && f.edad === edad && f.lactancia === lactancia);
+      const factorValue = factor ? factor.factor : 1;
+      const prodCorregida = lc305 > 0 ? lc305 * factorValue : 0;
+
+      // Lactancias: each productivo record per ejercicio = one lactancia, corrected by factor
+      const lactancias = allProds.slice(0, 5).map((p) => {
+        const w305 = computeWood305(p, vaca);
+        return w305 > 0 ? (w305 * factorValue).toFixed(0) : "";
+      });
 
       const pctGrasa = prod ? parseFloat(prod.porcentaje_grasa) || 0 : 0;
       const pctProt = prod ? parseFloat(prod.porcentaje_proteina) || 0 : 0;
       const kgGrasa = calcKg(lc305, pctGrasa);
       const kgProt = calcKg(lc305, pctProt);
       const kgSolidos = kgGrasa + kgProt;
-
-      // Valor de cría simplified
-      const edad = parseInt(vaca.edad) || 0;
-      const lactancia = parseInt(vaca.lactancia) || 0;
-      const razaMap: Record<string, string> = { "1": "Holstein", "2": "Jersey" };
-      const razaNombre = razaMap[vaca.raza] || vaca.raza;
-      const factor = factores.find((f) => f.raza === razaNombre && f.edad === edad && f.lactancia === lactancia);
-      const prodCorregida = factor && lc305 > 0 ? lc305 * factor.factor : 0;
 
       const iip = repro ? parseFloat(repro.iip) || 0 : 0;
       const ipc = repro ? parseFloat(repro.ipc) || 0 : 0;
@@ -66,7 +85,8 @@ const ReporteVacas = () => {
       return {
         id_vaca: vaca.id_vaca,
         kgGrasa, kgProt, kgSolidos, lc305, prodCorregida,
-        l1: prod?.lact1 || "", l2: prod?.lact2 || "", l3: prod?.lact3 || "", l4: prod?.lact4 || "", l5: prod?.lact5 || "",
+        l1: lactancias[0] || "", l2: lactancias[1] || "", l3: lactancias[2] || "",
+        l4: lactancias[3] || "", l5: lactancias[4] || "",
         iip, ipc, servConc,
       };
     });
