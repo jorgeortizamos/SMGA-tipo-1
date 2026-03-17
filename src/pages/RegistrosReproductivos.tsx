@@ -105,7 +105,6 @@ const RegistrosReproductivos = () => {
                 <FieldInput label="Id Vaca" value={form.id_vaca} onChange={() => {}} />
                 <FieldInput label="Ejercicio" value={form.ejercicio} onChange={() => {}} />
                 <FieldInput label="Parto" value={form.parto} onChange={update("parto")} type="date" highlighted />
-                <FieldSelect label="Raza" value={form.raza} onChange={update("raza")} options={razaOptions} placeholder="Seleccionar raza" highlighted />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <FieldInput label="Servicio 1" value={form.servicio1} onChange={update("servicio1")} type="date" highlighted />
