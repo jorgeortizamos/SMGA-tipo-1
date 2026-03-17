@@ -14,7 +14,240 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      registros_basicos: {
+        Row: {
+          created_at: string
+          edad: string | null
+          ejercicio: string
+          fecha_nacimiento: string | null
+          id: string
+          id_vaca: string
+          lactancia: string
+          partos: string
+          potencial_vaca: string | null
+          raza: string
+        }
+        Insert: {
+          created_at?: string
+          edad?: string | null
+          ejercicio?: string
+          fecha_nacimiento?: string | null
+          id?: string
+          id_vaca: string
+          lactancia?: string
+          partos?: string
+          potencial_vaca?: string | null
+          raza?: string
+        }
+        Update: {
+          created_at?: string
+          edad?: string | null
+          ejercicio?: string
+          fecha_nacimiento?: string | null
+          id?: string
+          id_vaca?: string
+          lactancia?: string
+          partos?: string
+          potencial_vaca?: string | null
+          raza?: string
+        }
+        Relationships: []
+      }
+      registros_otros: {
+        Row: {
+          created_at: string
+          ejercicio: string
+          fac_parto: string | null
+          fortaleza_patas: string | null
+          id: string
+          id_vaca: string
+          longevidad: string | null
+          mastitis: string | null
+          renguera: string | null
+        }
+        Insert: {
+          created_at?: string
+          ejercicio?: string
+          fac_parto?: string | null
+          fortaleza_patas?: string | null
+          id?: string
+          id_vaca: string
+          longevidad?: string | null
+          mastitis?: string | null
+          renguera?: string | null
+        }
+        Update: {
+          created_at?: string
+          ejercicio?: string
+          fac_parto?: string | null
+          fortaleza_patas?: string | null
+          id?: string
+          id_vaca?: string
+          longevidad?: string | null
+          mastitis?: string | null
+          renguera?: string | null
+        }
+        Relationships: []
+      }
+      registros_productivos: {
+        Row: {
+          created_at: string
+          ejercicio: string
+          id: string
+          id_vaca: string
+          lact1: string | null
+          lact2: string | null
+          lact3: string | null
+          lact4: string | null
+          lact5: string | null
+          lc305_wood: string | null
+          porcentaje_grasa: string | null
+          porcentaje_proteina: string | null
+          reg_1_dia30: string | null
+          reg_2_dia120: string | null
+          reg_3_dia210: string | null
+          reg_4_dia270: string | null
+        }
+        Insert: {
+          created_at?: string
+          ejercicio?: string
+          id?: string
+          id_vaca: string
+          lact1?: string | null
+          lact2?: string | null
+          lact3?: string | null
+          lact4?: string | null
+          lact5?: string | null
+          lc305_wood?: string | null
+          porcentaje_grasa?: string | null
+          porcentaje_proteina?: string | null
+          reg_1_dia30?: string | null
+          reg_2_dia120?: string | null
+          reg_3_dia210?: string | null
+          reg_4_dia270?: string | null
+        }
+        Update: {
+          created_at?: string
+          ejercicio?: string
+          id?: string
+          id_vaca?: string
+          lact1?: string | null
+          lact2?: string | null
+          lact3?: string | null
+          lact4?: string | null
+          lact5?: string | null
+          lc305_wood?: string | null
+          porcentaje_grasa?: string | null
+          porcentaje_proteina?: string | null
+          reg_1_dia30?: string | null
+          reg_2_dia120?: string | null
+          reg_3_dia210?: string | null
+          reg_4_dia270?: string | null
+        }
+        Relationships: []
+      }
+      registros_reproductivos: {
+        Row: {
+          aborto1: string | null
+          aborto2: string | null
+          concepcion1: string | null
+          created_at: string
+          ejercicio: string
+          id: string
+          id_vaca: string
+          iip: string | null
+          ipc: string | null
+          parto: string | null
+          parto1: string | null
+          raza: string | null
+          serv_conc: string | null
+          servicio1: string | null
+          servicio2: string | null
+          servicio3: string | null
+          toro_usado: string | null
+        }
+        Insert: {
+          aborto1?: string | null
+          aborto2?: string | null
+          concepcion1?: string | null
+          created_at?: string
+          ejercicio?: string
+          id?: string
+          id_vaca: string
+          iip?: string | null
+          ipc?: string | null
+          parto?: string | null
+          parto1?: string | null
+          raza?: string | null
+          serv_conc?: string | null
+          servicio1?: string | null
+          servicio2?: string | null
+          servicio3?: string | null
+          toro_usado?: string | null
+        }
+        Update: {
+          aborto1?: string | null
+          aborto2?: string | null
+          concepcion1?: string | null
+          created_at?: string
+          ejercicio?: string
+          id?: string
+          id_vaca?: string
+          iip?: string | null
+          ipc?: string | null
+          parto?: string | null
+          parto1?: string | null
+          raza?: string | null
+          serv_conc?: string | null
+          servicio1?: string | null
+          servicio2?: string | null
+          servicio3?: string | null
+          toro_usado?: string | null
+        }
+        Relationships: []
+      }
+      toros: {
+        Row: {
+          caracteristicas: string | null
+          created_at: string
+          dep_grasa: number | null
+          dep_leche: number | null
+          dep_prot: number | null
+          dep_tph: number | null
+          id: string
+          id_toro: string
+          indice_inia: number | null
+          indice_rovere: number | null
+          nombre: string | null
+        }
+        Insert: {
+          caracteristicas?: string | null
+          created_at?: string
+          dep_grasa?: number | null
+          dep_leche?: number | null
+          dep_prot?: number | null
+          dep_tph?: number | null
+          id?: string
+          id_toro: string
+          indice_inia?: number | null
+          indice_rovere?: number | null
+          nombre?: string | null
+        }
+        Update: {
+          caracteristicas?: string | null
+          created_at?: string
+          dep_grasa?: number | null
+          dep_leche?: number | null
+          dep_prot?: number | null
+          dep_tph?: number | null
+          id?: string
+          id_toro?: string
+          indice_inia?: number | null
+          indice_rovere?: number | null
+          nombre?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
