@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useGanaderia, RegistroReproductivo, reproductivoToDb } from "@/context/GanaderiaContext";
 import { supabase } from "@/integrations/supabase/client";
+import PdfReportButton from "@/components/PdfReportButton";
 
 const emptyRepro = (id_vaca: string, ejercicio: string): RegistroReproductivo => ({
   id_vaca, ejercicio, parto: "", raza: "",
