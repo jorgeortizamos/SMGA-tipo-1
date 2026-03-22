@@ -162,8 +162,13 @@ const TableroFinal = () => {
   return (
     <FormLayout title="Tablero Final">
       <div className="space-y-6">
-        {/* Filtro ejercicio */}
+        {/* PDF + Filtro ejercicio */}
         <div className="flex items-center gap-4">
+          <PdfReportButton
+            title="Tablero Final"
+            headers={["Indicador", "Primíparas", "Multíparas"]}
+            rows={summary.map(s => [s.label, s.primiparas, s.multiparas])}
+          />
           <span className="text-sm font-medium">Ejercicio:</span>
           <Select value={selectedEjercicio} onValueChange={setSelectedEjercicio}>
             <SelectTrigger className="w-40">

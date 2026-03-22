@@ -129,6 +129,11 @@ const RegistrosProductivos = () => {
     <FormLayout title="Registros Productivos">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <Input placeholder="Filtrar por Id Vaca..." value={filterText} onChange={e => setFilterText(e.target.value)} className="max-w-xs" />
+        <PdfReportButton
+          title="Registros Productivos"
+          headers={["Ejercicio", "Id Vaca", "R1 D30", "R2 D120", "R3 D210", "R4 D270", "LC305", "% Grasa", "% Prot"]}
+          rows={sorted.map(({ vaca, prod }) => [vaca.ejercicio, vaca.id_vaca, prod?.reg_1_dia30||"", prod?.reg_2_dia120||"", prod?.reg_3_dia210||"", prod?.reg_4_dia270||"", prod?.lc305_wood||"", prod?.porcentaje_grasa||"", prod?.porcentaje_proteina||""])}
+        />
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
