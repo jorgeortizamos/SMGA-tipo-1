@@ -116,7 +116,7 @@ const RegistrosBasicos = () => {
               <TableHead>Fecha Nac.</TableHead>
               <TableHead>Raza</TableHead>
               <TableHead>Lactancia</TableHead>
-              <TableHead>Edad (meses)</TableHead>
+              <TableHead>Edad (años)</TableHead>
               <TableHead>Potencial</TableHead>
               <TableHead className="w-24">Acciones</TableHead>
             </TableRow>
