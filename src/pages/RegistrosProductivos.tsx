@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Pencil, Trash2, ArrowUpDown } from "lucide-react";
 import { useGanaderia, RegistroProductivo, calcWood, productivoToDb } from "@/context/GanaderiaContext";
 import { supabase } from "@/integrations/supabase/client";
+import PdfReportButton from "@/components/PdfReportButton";
 
 const DIAS = [30, 120, 210, 270];
 const POTENCIALES = [2000, 3000, 4000, 5000, 6000, 7000];
