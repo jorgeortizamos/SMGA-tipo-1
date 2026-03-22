@@ -96,7 +96,7 @@ const RegistrosBasicos = () => {
                 <FieldInput label="Edad (años)" value={form.edad} onChange={() => {}} type="number" />
                 <FieldInput label="Potencial Vaca (lt)" value={form.potencial_vaca} onChange={update("potencial_vaca")} type="number" highlighted />
               </div>
-              <p className="text-xs text-muted-foreground">La edad se calcula automáticamente en meses a partir de la fecha de nacimiento.</p>
+              <p className="text-xs text-muted-foreground">La edad se calcula automáticamente en años a partir de la fecha de nacimiento.</p>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
                 <Button type="submit">{editIndex !== null ? "Actualizar" : "Guardar"}</Button>
