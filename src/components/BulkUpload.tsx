@@ -138,9 +138,34 @@ const BulkUpload = () => {
             const { error } = await supabase.from('registros_productivos').insert(dbRows);
             if (error) { errors.push(`Productivos DB: ${error.message}`); console.error(error); }
           } else if (sec.name === "Reproductivos") {
-            const appRows: RegistroReproductivo[] = rows.map(r => ({
-              ...r, iip: "", ipc: "", serv_conc: "",
-            } as RegistroReproductivo));
+            const appRows: RegistroReproductivo[] = rows.map(r => {
+              const parto = r.parto || "";
+              const parto1 = r.parto1 || "";
+              const concepcion1 = r.concepcion1 || "";
+              const s1 = r.servicio1 || "";
+              const s2 = r.servicio2 || "";
+              const s3 = r.servicio3 || "";
+              // Calculate IIP
+              let iip = "";
+              if (parto && parto1) {
+                const d1 = new Date(parto), d2 = new Date(parto1);
+                const diff = Math.abs(d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
+                if (diff > 0) iip = Math.round(diff).toString();
+              }
+              // Calculate IPC
+              let ipc = "";
+              if (parto && concepcion1) {
+                const d1 = new Date(parto), d2 = new Date(concepcion1);
+                const diff = (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
+                if (diff > 0) ipc = Math.round(diff).toString();
+              }
+              // Calculate S/C
+              let serv_conc = "";
+              const sCount = [s1, s2, s3].filter(Boolean).length;
+              if (sCount > 0) serv_conc = sCount.toString();
+
+              return { ...r, iip, ipc, serv_conc, toroUsado: r.toroUsado || "" } as RegistroReproductivo;
+            });
             setRegistrosReproductivos(prev => [...prev, ...appRows]);
             const dbRows = appRows.map(reproductivoToDb);
             const { error } = await supabase.from('registros_reproductivos').insert(dbRows);
