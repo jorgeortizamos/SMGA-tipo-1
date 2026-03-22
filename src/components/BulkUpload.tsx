@@ -100,7 +100,14 @@ const BulkUpload = () => {
           const rows = json.map((row) => {
             const mapped: Record<string, string> = {};
             for (const col of sec.cols) {
-              const key = Object.keys(row).find((k) => normalize(k) === normalize(col));
+              const normCol = normalize(col);
+              // Try direct match first, then aliases
+              const aliases = COL_ALIASES[normCol] || [];
+              const allNorms = [normCol, ...aliases];
+              const key = Object.keys(row).find((k) => {
+                const nk = normalize(k);
+                return allNorms.includes(nk);
+              });
               let val = key ? row[key] : "";
               // Convert Excel date serials
               if (DATE_COLS.has(col)) val = excelDateToString(val);
