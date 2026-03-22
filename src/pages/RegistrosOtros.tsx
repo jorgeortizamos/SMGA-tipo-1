@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
 import { useGanaderia, RegistroOtro, otroToDb } from "@/context/GanaderiaContext";
 import { supabase } from "@/integrations/supabase/client";
+import PdfReportButton from "@/components/PdfReportButton";
 
 const scoreOptions = Array.from({ length: 5 }, (_, i) => ({
   value: String(i + 1), label: String(i + 1),
