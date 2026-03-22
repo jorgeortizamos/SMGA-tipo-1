@@ -40,7 +40,7 @@ const RegistrosBasicos = () => {
       const next = { ...prev, [key]: value };
       // Auto-calculate edad in months when fecha_nacimiento changes
       if (key === "fecha_nacimiento" && value) {
-        next.edad = String(calcEdadMeses(value));
+        next.edad = String(calcEdadAnios(value));
       }
       return next;
     });
