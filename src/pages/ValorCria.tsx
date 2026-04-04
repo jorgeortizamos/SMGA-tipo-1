@@ -201,7 +201,7 @@ const ValorCria = () => {
           <TableHeader>
             <TableRow className="bg-muted/50">
               <SortHead label="Id Vaca" k="id_vaca" />
-              <TableHead>Prod. Corregida</TableHead>
+              <TableHead>Wood305</TableHead>
               <TableHead>Prom. Rodeo</TableHead>
               <TableHead>Σ Dif. Lact.</TableHead>
               <TableHead>n (Lact.)</TableHead>
