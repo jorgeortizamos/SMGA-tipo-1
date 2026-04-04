@@ -10,7 +10,7 @@ const BG_MODES = [
 ];
 
 const AccessibilityControls = () => {
-  const [sizeIdx, setSizeIdx] = useState(1);
+  const [sizeIdx, setSizeIdx] = useState(3);
   const [bgIdx, setBgIdx] = useState(0);
   const [bold, setBold] = useState(false);
   const [open, setOpen] = useState(false);
