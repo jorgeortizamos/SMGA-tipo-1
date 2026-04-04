@@ -79,16 +79,17 @@ const ValorCria = () => {
     return vals;
   };
 
-  // Get number of lactancias from registros basicos
-  const getNumLact = (vaca: typeof registrosBasicos[0]): number => {
-    return parseInt(vaca.lactancia) || 1;
+  // Get number of lactancias = registered lactancias + 1 (current one)
+  const getNumLact = (id_vaca: string): number => {
+    const lacts = getLactancias(id_vaca);
+    return lacts.length + 1;
   };
 
   // Build per-lactancia averages across all vacas
   // Group vacas by their lactancia number, compute rodeo average per lactancia
   const allVacasData = registrosBasicos.map(vaca => {
     const wood305 = getWood305(vaca);
-    const lactNum = getNumLact(vaca);
+    const lactNum = getNumLact(vaca.id_vaca);
     const lactVals = getLactancias(vaca.id_vaca);
     return { id_vaca: vaca.id_vaca, wood305, lactNum, lactVals };
   });
@@ -174,7 +175,7 @@ const ValorCria = () => {
       <div className="flex justify-end mb-4">
         <PdfReportButton
           title="Valor de Cría"
-          headers={["Id Vaca", "Prod. Corr.", "Prom. Rodeo", "Dif. Promedio", "n", "H2m", "Valor Cría", "VC Hijas"]}
+          headers={["Id Vaca", "Wood305", "Prom. Rodeo", "Dif. Promedio", "n", "H2m", "Valor Cría", "VC Hijas"]}
           rows={sorted.map(r => [r.id_vaca, r.prodCorregida.toFixed(1), r.promedioRodeo.toFixed(1), r.diffPromedio.toFixed(1), String(r.numLact), r.h2m.toFixed(4), r.valorCria.toFixed(1), r.valorCriaHijas.toFixed(1)])}
         />
       </div>
@@ -200,7 +201,7 @@ const ValorCria = () => {
           <TableHeader>
             <TableRow className="bg-muted/50">
               <SortHead label="Id Vaca" k="id_vaca" />
-              <TableHead>Prod. Corregida</TableHead>
+              <TableHead>Wood305</TableHead>
               <TableHead>Prom. Rodeo</TableHead>
               <TableHead>Σ Dif. Lact.</TableHead>
               <TableHead>n (Lact.)</TableHead>

@@ -113,10 +113,10 @@ const ReporteVacas = () => {
       ],
     },
     {
-      id: "leche", title: "2. Reporte Vacas Leche (Prod. Corregida)", defaultSort: "prodCorregida",
+      id: "leche", title: "2. Reporte Vacas Leche (Wood305)", defaultSort: "prodCorregida",
       cols: [
         { label: "Id Vaca", field: "id_vaca" },
-        { label: "Prod. Corregida", field: "prodCorregida" },
+        { label: "Wood305", field: "prodCorregida" },
       ],
     },
     {
