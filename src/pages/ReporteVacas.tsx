@@ -130,10 +130,10 @@ const ReporteVacas = () => {
       ],
     },
     {
-      id: "ips", title: "3. Reporte IPS", defaultSort: "iip",
+      id: "ips", title: "3. Reporte IPS (Parto–Servicio)", defaultSort: "ips",
       cols: [
         { label: "Id Vaca", field: "id_vaca" },
-        { label: "IPS (días)", field: "iip" },
+        { label: "IPS (días)", field: "ips" },
       ],
     },
     {
