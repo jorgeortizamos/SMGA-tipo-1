@@ -10,6 +10,16 @@ const DIAS = [30, 120, 210, 270] as const;
 const ProduccionWood = () => {
   const { registrosBasicos, registrosProductivos, factores } = useGanaderia();
 
+  const POTENCIALES = useMemo(() => {
+    const maxPot = Math.max(
+      ...registrosBasicos.map(r => parseFloat(r.potencial_vaca) || 0),
+      7000
+    );
+    const top = Math.ceil(maxPot / 1000) * 1000;
+    const range: number[] = [];
+    for (let v = 2000; v <= top; v += 1000) range.push(v);
+    return range;
+  }, [registrosBasicos]);
   const findFactor = (raza: string, edad: number, lactancia: number): { value: number; found: boolean } => {
     const razaMap: Record<string, string> = { "1": "Holstein", "2": "Jersey" };
     const razaNombre = razaMap[raza] || raza;
