@@ -116,9 +116,9 @@ const TableroFinal = () => {
         ? diffDias(vaca.fecha_nacimiento, repro.parto)
         : 0;
 
-      // EPS = fecha_primer_servicio - fecha_nacimiento (en días)
-      const eps = repro && repro.servicio1 && vaca.fecha_nacimiento
-        ? diffDias(vaca.fecha_nacimiento, repro.servicio1)
+      // EPS = fecha_segundo_parto - fecha_nacimiento (en días)
+      const eps = repro && repro.parto1 && vaca.fecha_nacimiento
+        ? diffDias(vaca.fecha_nacimiento, repro.parto1)
         : 0;
 
       const renguera = otro ? parseFloat(otro.renguera) || 0 : 0;
