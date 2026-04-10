@@ -278,6 +278,7 @@ export const GanaderiaProvider = ({ children }: { children: ReactNode }) => {
             dep_prot: r.dep_prot || 0, dep_tph: r.dep_tph || 0,
             indice_inia: r.indice_inia || 0, indice_rovere: r.indice_rovere || 0,
             caracteristicas: r.caracteristicas || '',
+            precio_dosis: 0,
           })));
         }
       } catch (err) {
