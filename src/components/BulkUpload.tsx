@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import {
   useGanaderia, RegistroBasico, RegistroProductivo, RegistroReproductivo, RegistroOtro,
   basicoToDb, productivoToDb, reproductivoToDb, otroToDb, calcEdadMeses,
@@ -119,7 +119,6 @@ const BulkUpload = () => {
 
           if (rows.length === 0) { errors.push(`Hoja "${sheetName}": sin filas válidas`); continue; }
 
-          // Insert into Supabase and update local state
           if (sec.name === "Básicos") {
             const appRows: RegistroBasico[] = rows.map(r => ({
               ...r,
@@ -127,8 +126,8 @@ const BulkUpload = () => {
             } as RegistroBasico));
             setRegistrosBasicos(prev => [...prev, ...appRows]);
             const dbRows = appRows.map(basicoToDb);
-            const { error } = await supabase.from('registros_basicos').insert(dbRows);
-            if (error) { errors.push(`Básicos DB: ${error.message}`); console.error(error); }
+            try { await api.post('/registros_basicos', dbRows); }
+            catch (err: any) { errors.push(`Básicos DB: ${err.message}`); console.error(err); }
           } else if (sec.name === "Productivos") {
             const appRows: RegistroProductivo[] = rows.map(r => ({
               ...r,
@@ -141,8 +140,8 @@ const BulkUpload = () => {
             } as RegistroProductivo));
             setRegistrosProductivos(prev => [...prev, ...appRows]);
             const dbRows = appRows.map(productivoToDb);
-            const { error } = await supabase.from('registros_productivos').insert(dbRows);
-            if (error) { errors.push(`Productivos DB: ${error.message}`); console.error(error); }
+            try { await api.post('/registros_productivos', dbRows); }
+            catch (err: any) { errors.push(`Productivos DB: ${err.message}`); console.error(err); }
           } else if (sec.name === "Reproductivos") {
             const appRows: RegistroReproductivo[] = rows.map(r => {
               const parto = r.parto || "";
@@ -151,37 +150,33 @@ const BulkUpload = () => {
               const s1 = r.servicio1 || "";
               const s2 = r.servicio2 || "";
               const s3 = r.servicio3 || "";
-              // Calculate IIP
               let iip = "";
               if (parto && parto1) {
                 const d1 = new Date(parto), d2 = new Date(parto1);
                 const diff = Math.abs(d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
                 if (diff > 0) iip = Math.round(diff).toString();
               }
-              // Calculate IPC
               let ipc = "";
               if (parto && concepcion1) {
                 const d1 = new Date(parto), d2 = new Date(concepcion1);
                 const diff = (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
                 if (diff > 0) ipc = Math.round(diff).toString();
               }
-              // Calculate S/C
               let serv_conc = "";
               const sCount = [s1, s2, s3].filter(Boolean).length;
               if (sCount > 0) serv_conc = sCount.toString();
-
               return { ...r, iip, ipc, serv_conc, toroUsado: r.toroUsado || "" } as RegistroReproductivo;
             });
             setRegistrosReproductivos(prev => [...prev, ...appRows]);
             const dbRows = appRows.map(reproductivoToDb);
-            const { error } = await supabase.from('registros_reproductivos').insert(dbRows);
-            if (error) { errors.push(`Reproductivos DB: ${error.message}`); console.error(error); }
+            try { await api.post('/registros_reproductivos', dbRows); }
+            catch (err: any) { errors.push(`Reproductivos DB: ${err.message}`); console.error(err); }
           } else if (sec.name === "Otros") {
             const appRows = rows as unknown as RegistroOtro[];
             setRegistrosOtros(prev => [...prev, ...appRows]);
             const dbRows = appRows.map(otroToDb);
-            const { error } = await supabase.from('registros_otros').insert(dbRows);
-            if (error) { errors.push(`Otros DB: ${error.message}`); console.error(error); }
+            try { await api.post('/registros_otros', dbRows); }
+            catch (err: any) { errors.push(`Otros DB: ${err.message}`); console.error(err); }
           }
 
           totalRows += rows.length;
@@ -217,7 +212,7 @@ const BulkUpload = () => {
         <FileSpreadsheet className="h-6 w-6 text-primary shrink-0" />
         <div className="flex-1 text-center sm:text-left">
           <p className="text-sm font-semibold text-card-foreground">Carga masiva de datos</p>
-          <p className="text-xs text-muted-foreground">Suba un archivo Excel o CSV — se guarda en Supabase</p>
+          <p className="text-xs text-muted-foreground">Suba un archivo Excel o CSV — se guarda en la base de datos</p>
         </div>
         <input
           ref={fileRef}

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Pencil, Trash2, ArrowUpDown } from "lucide-react";
 import { useGanaderia, RegistroProductivo, calcWood, productivoToDb } from "@/context/GanaderiaContext";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import PdfReportButton from "@/components/PdfReportButton";
 import DeleteAllButton from "@/components/DeleteAllButton";
 
@@ -74,14 +74,14 @@ const RegistrosProductivos = () => {
 
     if (existingIdx >= 0) {
       setRegistrosProductivos(prev => prev.map((r, i) => (i === existingIdx ? updatedForm : r)));
-      await supabase.from('registros_productivos').delete().eq('id_vaca', updatedForm.id_vaca).eq('ejercicio', updatedForm.ejercicio);
-      await supabase.from('registros_productivos').insert(dbRow);
+      await api.put(`/registros_productivos/${encodeURIComponent(updatedForm.id_vaca)}/${encodeURIComponent(updatedForm.ejercicio)}`, dbRow);
       toast.success("Registro actualizado");
     } else {
       setRegistrosProductivos(prev => [...prev, updatedForm]);
-      const { error } = await supabase.from('registros_productivos').insert(dbRow);
-      if (error) { toast.error("Error al guardar"); console.error(error); }
-      else toast.success("Registro guardado");
+      try {
+        await api.post('/registros_productivos', dbRow);
+        toast.success("Registro guardado");
+      } catch (err) { toast.error("Error al guardar"); console.error(err); }
     }
     setForm(null); setEditVacaId(null); setOpen(false);
   };
@@ -92,7 +92,7 @@ const RegistrosProductivos = () => {
   };
 
   const handleDeleteAll = async () => {
-    await supabase.from('registros_productivos').delete().neq('id_vaca', '');
+    await api.delete('/registros_productivos');
     setRegistrosProductivos([]);
     toast.success("Todos los registros productivos eliminados");
   };

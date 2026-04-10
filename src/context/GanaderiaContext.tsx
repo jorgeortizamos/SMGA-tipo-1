@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 
 export interface RegistroReproductivo {
   id_vaca: string;
@@ -134,7 +134,6 @@ export const calcWood = (potencial_vaca: number, dia: number): number => {
   return (potencial_vaca * 0.00318) * Math.pow(dia, 0.1027) * Math.exp(-0.003 * dia);
 };
 
-// Helper: calculate age in years from fecha_nacimiento
 export const calcEdadAnios = (fechaNac: string): number => {
   if (!fechaNac) return 0;
   const birth = new Date(fechaNac);
@@ -144,10 +143,8 @@ export const calcEdadAnios = (fechaNac: string): number => {
   return Math.max(0, Math.floor(diffYears));
 };
 
-// Keep backward compat alias
 export const calcEdadMeses = calcEdadAnios;
 
-// Helper: convert value to number or null for Supabase
 const toNum = (v: string): number | null => {
   if (!v || v === "") return null;
   const n = parseFloat(v);
@@ -160,7 +157,6 @@ const toInt = (v: string): number | null => {
 };
 const toDateOrNull = (v: string): string | null => (!v || v === "") ? null : v;
 
-// Build Supabase row from app record
 export const basicoToDb = (r: RegistroBasico) => ({
   ejercicio: r.ejercicio, id_vaca: r.id_vaca, partos: r.partos,
   fecha_nacimiento: toDateOrNull(r.fecha_nacimiento), raza: r.raza,
@@ -229,22 +225,22 @@ export const GanaderiaProvider = ({ children }: { children: ReactNode }) => {
     const loadData = async () => {
       try {
         const [basicos, productivos, reproductivos, otros, torosData] = await Promise.all([
-          supabase.from('registros_basicos').select('*'),
-          supabase.from('registros_productivos').select('*'),
-          supabase.from('registros_reproductivos').select('*'),
-          supabase.from('registros_otros').select('*'),
-          supabase.from('toros').select('*'),
+          api.get("/registros_basicos"),
+          api.get("/registros_productivos"),
+          api.get("/registros_reproductivos"),
+          api.get("/registros_otros"),
+          api.get("/toros"),
         ]);
 
-        if (basicos.data?.length) {
-          setRegistrosBasicos(basicos.data.map((r: any) => ({
+        if (basicos?.length) {
+          setRegistrosBasicos(basicos.map((r: any) => ({
             ejercicio: str(r.ejercicio), id_vaca: str(r.id_vaca), partos: str(r.partos),
             fecha_nacimiento: str(r.fecha_nacimiento), raza: str(r.raza),
             lactancia: str(r.lactancia), edad: str(r.edad), potencial_vaca: str(r.potencial_vaca),
           })));
         }
-        if (productivos.data?.length) {
-          setRegistrosProductivos(productivos.data.map((r: any) => ({
+        if (productivos?.length) {
+          setRegistrosProductivos(productivos.map((r: any) => ({
             ejercicio: str(r.ejercicio), id_vaca: str(r.id_vaca),
             reg_1_dia30: str(r.reg_1_dia30), reg_2_dia120: str(r.reg_2_dia120),
             reg_3_dia210: str(r.reg_3_dia210), reg_4_dia270: str(r.reg_4_dia270),
@@ -254,8 +250,8 @@ export const GanaderiaProvider = ({ children }: { children: ReactNode }) => {
             lact4: str(r.lact4), lact5: str(r.lact5),
           })));
         }
-        if (reproductivos.data?.length) {
-          setRegistrosReproductivos(reproductivos.data.map((r: any) => ({
+        if (reproductivos?.length) {
+          setRegistrosReproductivos(reproductivos.map((r: any) => ({
             id_vaca: str(r.id_vaca), ejercicio: str(r.ejercicio), parto: str(r.parto),
             raza: str(r.raza), servicio1: str(r.servicio1), servicio2: str(r.servicio2),
             servicio3: str(r.servicio3), concepcion1: str(r.concepcion1),
@@ -263,16 +259,16 @@ export const GanaderiaProvider = ({ children }: { children: ReactNode }) => {
             parto1: str(r.parto1), iip: str(r.iip), ipc: str(r.ipc), serv_conc: str(r.serv_conc),
           })));
         }
-        if (otros.data?.length) {
-          setRegistrosOtros(otros.data.map((r: any) => ({
+        if (otros?.length) {
+          setRegistrosOtros(otros.map((r: any) => ({
             id_vaca: str(r.id_vaca), ejercicio: str(r.ejercicio),
             renguera: str(r.renguera), mastitis: str(r.mastitis),
             facParto: str(r.fac_parto), longevidad: str(r.longevidad),
             fortalezaPatas: str(r.fortaleza_patas),
           })));
         }
-        if (torosData.data?.length) {
-          setToros(torosData.data.map((r: any) => ({
+        if (torosData?.length) {
+          setToros(torosData.map((r: any) => ({
             id_toro: r.id_toro || '', nombre: r.nombre || '',
             dep_leche: r.dep_leche || 0, dep_grasa: r.dep_grasa || 0,
             dep_prot: r.dep_prot || 0, dep_tph: r.dep_tph || 0,
@@ -282,7 +278,7 @@ export const GanaderiaProvider = ({ children }: { children: ReactNode }) => {
           })));
         }
       } catch (err) {
-        console.error('Error loading data from Supabase:', err);
+        console.error('Error loading data:', err);
       } finally {
         setLoading(false);
       }
@@ -291,7 +287,7 @@ export const GanaderiaProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const deleteRegistro = async (table: string, id_vaca: string, ejercicio: string) => {
-    await (supabase as any).from(table).delete().eq('id_vaca', id_vaca).eq('ejercicio', ejercicio);
+    await api.delete(`/${table}/${encodeURIComponent(id_vaca)}/${encodeURIComponent(ejercicio)}`);
     switch (table) {
       case 'registros_basicos':
         setRegistrosBasicos(prev => prev.filter(r => !(r.id_vaca === id_vaca && r.ejercicio === ejercicio)));
