@@ -15,7 +15,6 @@ import RegistrosOtros from "./pages/RegistrosOtros.tsx";
 import ReporteVacas from "./pages/ReporteVacas.tsx";
 import ReporteToros from "./pages/ReporteToros.tsx";
 import TableroFinal from "./pages/TableroFinal.tsx";
-import FactoresCorreccion from "./pages/FactoresCorreccion.tsx";
 import ProduccionWood from "./pages/ProduccionWood.tsx";
 import IndicadoresReproductivos from "./pages/IndicadoresReproductivos.tsx";
 import ValorCria from "./pages/ValorCria.tsx";
@@ -38,7 +37,6 @@ const App = () => (
               <Route path="/reproductivos" element={<RegistrosReproductivos />} />
               <Route path="/productivos" element={<RegistrosProductivos />} />
               <Route path="/otros" element={<RegistrosOtros />} />
-              <Route path="/factores" element={<FactoresCorreccion />} />
               <Route path="/produccion-wood" element={<ProduccionWood />} />
               <Route path="/reporte-vacas" element={<ReporteVacas />} />
               <Route path="/reporte-toros" element={<ReporteToros />} />
